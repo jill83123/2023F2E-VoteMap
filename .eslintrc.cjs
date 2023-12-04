@@ -21,4 +21,8 @@ module.exports = {
     },
     'import/core-modules': ['vite', '@vitejs/plugin-vue'],
   },
+  rules: {
+    'no-unused-vars': 'warn',
+    'max-len': 'off',
+  },
 };
