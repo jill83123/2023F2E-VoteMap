@@ -1,0 +1,14 @@
+[
+{"prv_code":"00","city_code":"000","area_code":"01","dept_code":"000","li_code":"0000","cand_no":"1","cand_name":"柯文哲","party_code":"350","cand_sex":"1","cand_birthday":"0480806","cand_age":"64","cand_bornplace":"臺灣省","cand_edu":"博士","is_current":"N","is_victor":" ","is_vice":" "}
+,
+{"prv_code":"00","city_code":"000","area_code":"01","dept_code":"000","li_code":"0000","cand_no":"1","cand_name":"吳欣盈","party_code":"350","cand_sex":"2","cand_birthday":"0670518","cand_age":"45","cand_bornplace":"其他國家","cand_edu":"碩士","is_current":"N","is_victor":" ","is_vice":"Y"}
+,
+{"prv_code":"00","city_code":"000","area_code":"01","dept_code":"000","li_code":"0000","cand_no":"2","cand_name":"賴清德","party_code":"16","cand_sex":"1","cand_birthday":"0481006","cand_age":"64","cand_bornplace":"新北市","cand_edu":"碩士","is_current":"Y","is_victor":"*","is_vice":" "}
+,
+{"prv_code":"00","city_code":"000","area_code":"01","dept_code":"000","li_code":"0000","cand_no":"2","cand_name":"蕭美琴","party_code":"16","cand_sex":"2","cand_birthday":"0600807","cand_age":"52","cand_bornplace":"其他國家","cand_edu":"碩士","is_current":"N","is_victor":" ","is_vice":"Y"}
+,
+{"prv_code":"00","city_code":"000","area_code":"01","dept_code":"000","li_code":"0000","cand_no":"3","cand_name":"侯友宜","party_code":"1","cand_sex":"1","cand_birthday":"0460607","cand_age":"66","cand_bornplace":"臺灣省","cand_edu":"博士","is_current":"N","is_victor":" ","is_vice":" "}
+,
+{"prv_code":"00","city_code":"000","area_code":"01","dept_code":"000","li_code":"0000","cand_no":"3","cand_name":"趙少康","party_code":"1","cand_sex":"1","cand_birthday":"0391116","cand_age":"73","cand_bornplace":"臺灣省","cand_edu":"碩士","is_current":"N","is_victor":" ","is_vice":"Y"}
+
+]

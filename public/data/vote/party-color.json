@@ -1,0 +1,22 @@
+[
+  {
+    "party_name": "中國國民黨",
+    "color": "#8F8FFF"
+  },
+  {
+    "party_name": "台灣民眾黨",
+    "color": "#A6E0E0"
+  },
+  {
+    "party_name": "民主進步黨",
+    "color": "#8EC88E"
+  },
+  {
+    "party_name": "親民黨",
+    "color": "#FF9F6D"
+  },
+  {
+    "party_name": "新黨",
+    "color": "#FFDD66"
+  }
+]
