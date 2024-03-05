@@ -3,7 +3,7 @@ import axios from 'axios';
 
 const votesStore = defineStore('votesStore', {
   state: () => ({
-    years: ['2000', '2004', '2008', '2012', '2016', '2020', '2024'],
+    years: ['1996', '2000', '2004', '2008', '2012', '2016', '2020', '2024'],
     currentYear: '',
     externalData: {
       regionData: {},
