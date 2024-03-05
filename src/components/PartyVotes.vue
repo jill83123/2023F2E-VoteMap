@@ -41,85 +41,121 @@
 
 <script setup>
 import { ref, onMounted } from 'vue';
-import {
-  select, scaleBand, axisBottom, scaleLinear, axisLeft, line,
-} from 'd3';
+import { select, scaleBand, axisBottom, scaleLinear, axisLeft, line } from 'd3';
 import createVotesStore from '@/stores/votesStore';
 
-const votesStore = createVotesStore();
+let svgWidth = null;
+const svgHeight = 210;
 
-const partiesVotesChart = ref(null);
-function drawVotesChart() {
-  const svgWidth = partiesVotesChart.value.clientWidth;
-  const svgHeight = 210;
+const marginLeft = 57;
+const marginBottom = 28;
+const xPadding = 16;
 
-  const marginLeft = 57;
-  const marginBottom = 28;
-  const xPadding = 16;
+function createSvg(chartRef) {
+  svgWidth = chartRef.value.clientWidth;
 
-  const svg = select(partiesVotesChart.value)
+  const svg = select(chartRef.value)
     .append('svg')
     .attr('width', svgWidth - xPadding)
-    .attr('height', svgHeight);
+    .attr('height', svgHeight)
+    .style('overflow', 'visible');
 
-  // x 軸尺度
-  const { years } = votesStore;
+  return svg;
+}
+
+function createChartContainer(svg) {
+  const chartContainer = svg
+    .append('g')
+    .attr('transform', `translate(${marginLeft}, -${marginBottom})`);
+
+  return chartContainer;
+}
+
+const votesStore = createVotesStore();
+const { years, pastPartiesVotes } = votesStore;
+
+// ------------ 設定 xy 軸比例尺 ------------ //
+function createScaleX() {
   const scaleX = scaleBand()
     .domain(years)
     .range([0, svgWidth - xPadding - marginLeft]);
-  // 繪製
+
+  return scaleX;
+}
+
+function createScaleY(key) {
+  const maxData = Math.max(
+    ...years.map((year) => pastPartiesVotes[year].map((obj) => obj[key])).flat(),
+  );
+  const scaleY = scaleLinear()
+    .domain([0, maxData])
+    .range([svgHeight, marginBottom + 2]);
+
+  return scaleY;
+}
+
+// ------------ 繪製 xy 軸 ------------ //
+function drawAxisX({ svg, scaleX }) {
   const xAxis = svg
     .append('g')
     .attr('transform', `translate(${marginLeft}, ${svgHeight - marginBottom})`)
     .call(axisBottom(scaleX).ticks(years.length).tickSize(0));
   xAxis.selectAll('text').attr('transform', 'translate(0, 10)');
   xAxis.select('.domain').remove();
+}
 
-  // y 軸尺度
-  const { pastPartiesVotes } = votesStore;
-  const allVotes = years.map((year) => pastPartiesVotes[year].map((item) => item.ticketNum)).flat();
-  const maxVotes = Math.max(...allVotes);
-  const scaleY = scaleLinear().domain([0, maxVotes]).range([svgHeight, marginBottom + 2]);
-  // 繪製
+function drawAxisY({ svg, scaleY, contentType }) {
   const yAxis = svg
     .append('g')
     .call(
       axisLeft(scaleY)
         .ticks(5)
         .tickSize(0)
-        .tickFormat((d) => `${d / 10000} 萬`),
+        .tickFormat((d) => (contentType === 'votes' ? `${d / 10000} 萬` : `${d}%`)),
     )
     .attr('transform', `translate(${marginLeft}, -${marginBottom})`);
-  yAxis.select('.domain').remove();
   yAxis.selectAll('.tick text').attr('transform', 'translate(-14, 1)');
+  yAxis.select('.domain').remove();
 
-  // y 軸背景線
+  // 背景線
   yAxis
     .selectAll('.tick')
     .append('line')
     .attr('x1', -12)
     .attr('x2', svgWidth - xPadding - marginLeft)
-    .attr('y1', 0)
-    .attr('y2', 0)
     .attr('stroke', '#DEE2E6');
+}
+
+// ------------ 繪製長條圖 ------------ //
+const partiesVotesChart = ref(null);
+function drawVotesChart() {
+  const svg = createSvg(partiesVotesChart);
+
+  // 繪製 x 軸
+  const scaleX = createScaleX();
+  drawAxisX({ svg, scaleX });
+
+  // 繪製 y 軸
+  const scaleY = createScaleY('ticketNum');
+  drawAxisY({ svg, scaleY, contentType: 'votes' });
 
   const barWidth = 12;
 
-  // x 軸子群組尺度
+  // x 軸子群組比例尺
   const xSubgroupScales = {};
   years.forEach((year) => {
     const scale = scaleBand()
-      .domain(pastPartiesVotes[year].map((data) => `${year}-${data.partyName}-${data.candNo}`))
+      .domain(pastPartiesVotes[year].map((d) => `${year}-${d.partyName}-${d.candNo}`))
       .range([0, pastPartiesVotes[year].length * (barWidth + 2)]);
     xSubgroupScales[year] = scale;
   });
-  // 繪製
-  const barContainer = svg
-    .append('g')
-    .attr('transform', `translate(${marginLeft}, ${-marginBottom})`);
+
+  // 繪製 bar
+  const chartContainer = createChartContainer(svg);
+
   years.forEach((year) => {
     const subGroupScale = xSubgroupScales[year];
-    const barGroup = barContainer
+    const barGroup = chartContainer
       .append('g')
       .attr(
         'transform',
@@ -130,6 +166,7 @@ function drawVotesChart() {
         }, 0)`,
       )
       .attr('data-year', year);
+
     barGroup
       .selectAll('g')
       .data(pastPartiesVotes[year])
@@ -138,71 +175,23 @@ function drawVotesChart() {
       .attr('y', (d) => scaleY(d.ticketNum))
       .attr('width', barWidth)
       .attr('height', (d) => svgHeight - scaleY(d.ticketNum))
+      .attr('fill', (d) => d.partyColor)
       .attr('data-name', (d) => d.partyName)
-      .attr('data-votes', (d) => d.ticketNum)
-      .attr('fill', (d) => d.partyColor);
+      .attr('data-votes', (d) => d.ticketNum);
   });
 }
 
 const partiesVotesPercentChart = ref(null);
 function drawPercentChart() {
-  const svgWidth = partiesVotesPercentChart.value.clientWidth;
-  const svgHeight = 210;
+  const svg = createSvg(partiesVotesPercentChart);
 
-  const marginLeft = 57;
-  const marginBottom = 28;
-  const xPadding = 16;
+  // 繪製 x 軸
+  const scaleX = createScaleX();
+  drawAxisX({ svg, scaleX });
 
-  const svg = select(partiesVotesPercentChart.value)
-    .append('svg')
-    .attr('width', svgWidth - xPadding)
-    .attr('height', svgHeight)
-    .style('overflow', 'visible');
-
-  // x 軸尺度
-  const { years } = votesStore;
-  const scaleX = scaleBand()
-    .domain(years)
-    .range([0, svgWidth - xPadding - marginLeft]);
-  // 繪製
-  const xAxis = svg
-    .append('g')
-    .attr('transform', `translate(${marginLeft}, ${svgHeight - marginBottom})`)
-    .call(axisBottom(scaleX).ticks(years.length).tickSize(0));
-  xAxis.selectAll('text').attr('transform', 'translate(0, 10)');
-  xAxis.select('.domain').remove();
-
-  // y 軸尺度
-  const { pastPartiesVotes } = votesStore;
-  const allPercent = years
-    .map((year) => pastPartiesVotes[year].map((item) => item.ticketPercent))
-    .flat();
-  const maxPercent = Math.max(...allPercent);
-  const scaleY = scaleLinear()
-    .domain([0, maxPercent])
-    .range([svgHeight, marginBottom + 2]);
-  // 繪製
-  const yAxis = svg
-    .append('g')
-    .call(
-      axisLeft(scaleY)
-        .ticks(5)
-        .tickSize(0)
-        .tickFormat((d) => `${d}%`),
-    )
-    .attr('transform', `translate(${marginLeft}, -${marginBottom})`);
-  yAxis.select('.domain').remove();
-  yAxis.selectAll('.tick text').attr('transform', 'translate(-14, 1)');
-
-  // y 軸背景線
-  yAxis
-    .selectAll('.tick')
-    .append('line')
-    .attr('x1', -12)
-    .attr('x2', svgWidth - xPadding - marginLeft)
-    .attr('y1', 0)
-    .attr('y2', 0)
-    .attr('stroke', '#DEE2E6');
+  // 繪製 y 軸
+  const scaleY = createScaleY('ticketPercent');
+  drawAxisY({ svg, scaleY, contentType: 'votesPercent' });
 
   // 調整資料結構
   const allData = years.map((year) => pastPartiesVotes[year].map((item) => item)).flat();
@@ -237,11 +226,9 @@ function drawPercentChart() {
     .x((d) => scaleX(d.time))
     .y((d) => scaleY(d.value));
 
-  const lineContainer = svg
-    .append('g')
-    .attr('transform', `translate(${marginLeft}, ${-marginBottom})`);
+  const chartContainer = createChartContainer(svg);
 
-  lineContainer
+  chartContainer
     .append('g')
     .selectAll('myLines')
     .data(newData)
@@ -254,28 +241,25 @@ function drawPercentChart() {
     .attr('transform', `translate(${scaleX.bandwidth() / 2}, 0)`);
 
   // 繪製點
-  lineContainer
+  chartContainer
     .append('g')
     .selectAll('myDots')
     .data(newData)
-    .enter()
-    .append('g')
+    .join('g')
     .attr('data-name', (d) => d.name)
     .style('fill', (d) => d.color)
     .selectAll('myPoints')
     .data((d) => d.values)
-    .enter()
-    .append('circle')
+    .join('circle')
     .attr('cx', (d) => scaleX(d.time))
     .attr('cy', (d) => scaleY(d.value))
-    .attr('data-percent', (d) => `${d.value}%`)
     .attr('r', 4)
+    .attr('data-percent', (d) => `${d.value}%`)
     .attr('transform', `translate(${scaleX.bandwidth() / 2}, 0)`);
 }
 
 const tagData = ref(null);
 function getTagData() {
-  const { years, pastPartiesVotes } = votesStore;
   const data = {};
   let otherData = {};
   years.forEach((year) => {
