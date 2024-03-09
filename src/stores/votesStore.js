@@ -4,7 +4,13 @@ import axios from 'axios';
 const votesStore = defineStore('votesStore', {
   state: () => ({
     years: ['1996', '2000', '2004', '2008', '2012', '2016', '2020', '2024'],
-    currentYear: '',
+    cities: [],
+    towns: [],
+    currentOption: {
+      year: '',
+      city: '',
+      town: '',
+    },
     externalData: {
       regionData: {},
       regionVoteData: {},
@@ -74,6 +80,56 @@ const votesStore = defineStore('votesStore', {
           }
           this.pastPartiesVotes[year].sort((a, b) => b.ticketPercent - a.ticketPercent);
         });
+      });
+    },
+
+    changeCurrentOption(option, value) {
+      this.currentOption[option] = value;
+      if (option === 'year') {
+        this.getAllCitesName(value);
+      } else if (option === 'city') {
+        this.currentOption.town = '';
+        this.getTownsInCity();
+      }
+    },
+
+    getAllCitesName(year) {
+      this.cities = [];
+
+      const filterData = (data) => data.area_code === '00'
+        && data.dept_code === '000'
+        && data.li_code === '0000'
+        && data.area_name !== '臺灣省'
+        && data.area_name !== '福建省';
+
+      this.externalData.regionData[year].forEach((data) => {
+        if (filterData(data)) {
+          this.cities.push(data.area_name);
+        }
+      });
+
+      // 把全國的選項移到最前面
+      const all = this.cities.pop();
+      this.cities.unshift(all);
+    },
+
+    getTownsInCity() {
+      this.towns = [];
+
+      const { year, city } = this.currentOption;
+      const currentCityData = this.externalData.regionData[year].find(
+        (data) => data.area_name === city,
+      );
+
+      const filterData = (data) => data.prv_code === currentCityData?.prv_code
+        && data.city_code === currentCityData?.city_code
+        && data.li_code === '0000'
+        && data.dept_code !== '000';
+
+      this.externalData.regionData[year].forEach((data) => {
+        if (filterData(data)) {
+          this.towns.push(data.area_name);
+        }
       });
     },
   },

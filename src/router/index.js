@@ -8,8 +8,8 @@ const router = createRouter({
       component: () => import('@/views/IndexView.vue'),
     },
     {
-      path: '/vote-count',
-      component: () => import('@/views/VoteCountView.vue'),
+      path: '/votes',
+      component: () => import('@/views/VotesView.vue'),
     },
   ],
 });
