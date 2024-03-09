@@ -8,5 +8,10 @@
   "trailingComma": "all",
   "bracketSpacing": true,
   "proseWrap": "never",
-  "endOfLine": "auto"
+  "endOfLine": "auto",
+  "htmlWhitespaceSensitivity": "ignore",
+  "bracketSameLine": true,
+  "plugins": [
+    "prettier-plugin-tailwindcss"
+  ]
 }

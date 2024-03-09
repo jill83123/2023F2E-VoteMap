@@ -25,6 +25,7 @@ module.exports = {
     extend: {
       fontFamily: {
         sans: ['Noto Sans TC', ...defaultTheme.fontFamily.sans],
+        mantou: ['Mantou', 'sans-serif'],
       },
       colors: {
         product: {
@@ -39,6 +40,13 @@ module.exports = {
           1: '#8082FF',
           2: '#F4A76F',
           3: '#57D2A9',
+        },
+        gray: {
+          100: '#F8F9FA',
+          400: '#CED4DA',
+          500: '#ADB5BD',
+          600: '#6C757D',
+          800: '#343A40',
         },
       },
     },

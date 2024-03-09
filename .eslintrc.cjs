@@ -24,5 +24,6 @@ module.exports = {
   rules: {
     'no-unused-vars': 'warn',
     'max-len': 'off',
+    'object-curly-newline': 'off',
   },
 };

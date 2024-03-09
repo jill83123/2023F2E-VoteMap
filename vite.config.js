@@ -6,6 +6,7 @@ import eslintPlugin from 'vite-plugin-eslint';
 
 // https://vitejs.dev/config/
 export default defineConfig({
+  base: process.env.NODE_ENV === 'production' ? '/2023F2E-VoteMap/' : '/',
   plugins: [
     vue(),
     eslintPlugin({
